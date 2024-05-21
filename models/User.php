@@ -2,38 +2,91 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use Yii;
+
+/**
+ * This is the model class for table "user".
+ *
+ * @property int $id
+ * @property int $id_otdel
+ * @property string $fio
+ * @property string $phone
+ * @property string $email
+ * @property string $username
+ * @property string $password
+ *
+ * @property Otdel $otdel
+ * @property Statement[] $statements
+ */
+class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
-
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'user';
+    }
 
     /**
      * {@inheritdoc}
      */
+    public function rules()
+    {
+        return [
+            [['id_otdel', 'fio', 'phone', 'email', 'username', 'password'], 'required'],
+            [['id_otdel'], 'integer'],
+            [['fio', 'phone', 'email', 'username', 'password'], 'string', 'max' => 255],
+            [['id_otdel'], 'exist', 'skipOnError' => true, 'targetClass' => Otdel::class, 'targetAttribute' => ['id_otdel' => 'id']],
+            [['password'], 'string', 'min' => 6, 'tooShort'=>'не менее 6 символов'],
+            [['fio'], 'match', 'pattern' => "/[а-яёА-ЯЁ]/u", 'message' => 'только кириллица'],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'id_otdel' => 'Id Otdel',
+            'fio' => 'Fio',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'username' => 'Username',
+            'password' => 'Password',
+        ];
+    }
+
+    /**
+     * Gets query for [[Otdel]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOtdel()
+    {
+        return $this->hasOne(Otdel::class, ['id' => 'id_otdel']);
+    }
+
+    /**
+     * Gets query for [[Statements]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStatements()
+    {
+        return $this->hasMany(Statement::class, ['id_user' => 'id']);
+    }
+
+    // регистрация !!!
+
+      /**
+     * {@inheritdoc}
+     */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return self::findOne($id);
     }
 
     /**
@@ -41,13 +94,8 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
 
-        return null;
+        return;
     }
 
     /**
@@ -58,13 +106,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return self::find()->where(['username'=>$username])->one();
     }
 
     /**
@@ -80,7 +122,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+        
     }
 
     /**
@@ -88,7 +130,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        
     }
 
     /**
