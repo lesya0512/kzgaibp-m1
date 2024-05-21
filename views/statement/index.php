@@ -29,12 +29,28 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'id',
-            'id_user',
-            'id_status',
-            'id_category',
-            'id_otdel',
-            //'description',
+            // 'id',
+            ['attribute' => 'id_user',
+                'value' => function($model){
+                    return $model->user->fio;
+                }
+            ],
+            ['attribute' => 'id_category',
+                'value' => function($model){
+                    return $model->category->category;
+                }
+            ],
+            ['attribute' => 'id_otdel',
+                'value' => function($model){
+                    return $model->otdel->otdel;
+                }
+            ],
+            'description',
+            ['attribute' => 'id_status',
+                'value' => function($model){
+                    return $model->status->status;
+                }
+            ],
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, Statement $model, $key, $index, $column) {

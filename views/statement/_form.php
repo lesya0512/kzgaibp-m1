@@ -12,13 +12,26 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'id_user')->textInput() ?>
+    <!-- <?= $form->field($model, 'id_user')->textInput() ?> -->
 
-    <?= $form->field($model, 'id_status')->textInput() ?>
+    <!-- редактирование статуса для админа -->
 
-    <?= $form->field($model, 'id_category')->textInput() ?>
+    <?php 
+        if(Yii::$app->user->identity->username == 'help') 
+        echo $form->field($model, 'id_status')->dropDownList(\yii\helpers\ArrayHelper::map(\app\models\Status::find()->all(), 'id', 'status'));
+    ?>
 
-    <?= $form->field($model, 'id_otdel')->textInput() ?>
+    <!-- . -->
+
+    <?php 
+        if(Yii::$app->user->identity->id) 
+        echo $form->field($model, 'id_category')->dropDownList(\yii\helpers\ArrayHelper::map(\app\models\Category::find()->all(), 'id', 'category'));
+    ?>
+
+    <?php 
+        if(Yii::$app->user->identity->id) 
+        echo $form->field($model, 'id_otdel')->dropDownList(\yii\helpers\ArrayHelper::map(\app\models\Otdel::find()->all(), 'id', 'otdel'));
+    ?>
 
     <?= $form->field($model, 'description')->textInput(['maxlength' => true]) ?>
 

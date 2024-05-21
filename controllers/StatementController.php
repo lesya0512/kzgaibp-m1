@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Statement;
 use app\models\StatementSearch;
 use yii\web\Controller;
@@ -65,13 +66,21 @@ class StatementController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
+
+    // новый статус по умолчанию и привязка к айди поьзователя
+    
     public function actionCreate()
     {
         $model = new Statement();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
+            if ($model->load($this->request->post())) {
+                $model->id_user=Yii::$app->user->identity->id;
+                $model->id_status = 1;
+
+                if ($model -> save()) {
+                    return $this->redirect(['/statement']);
+                }
             }
         } else {
             $model->loadDefaultValues();

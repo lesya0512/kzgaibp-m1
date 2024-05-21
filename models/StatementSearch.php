@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Statement;
@@ -55,6 +56,12 @@ class StatementSearch extends Statement
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        // ввывод записей конкретного пользователя
+
+        if (Yii::$app->user->identity->username !='help'){ 
+            $query->andWhere(['id_user'=>Yii::$app->user->id]); 
+        } 
 
         // grid filtering conditions
         $query->andFilterWhere([
